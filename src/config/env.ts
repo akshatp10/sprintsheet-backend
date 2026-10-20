@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import path from "node:path";
 
 dotenv.config({
-	path: path.resolve(process.cwd(), ".env.development"),
+	path: path.resolve(process.cwd(), ".env"),
 });
 
 function required(name: string): string {
