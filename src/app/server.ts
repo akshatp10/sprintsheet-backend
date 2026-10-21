@@ -1,12 +1,14 @@
 import express from "express";
 import { env } from "../config/env";
 import appRouter from "../router/routes";
+import { initDatabaseTable } from "../db/init";
 
 const app = express();
 const PORT = env.port;
 
 //Main working app
 app.use(express.json());
+initDatabaseTable();
 
 // Importing main router to be used throughout app
 app.use("/api", appRouter);
