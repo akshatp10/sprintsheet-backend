@@ -6,8 +6,12 @@ import stageRouter from "../features/stages/routes/stageRoutes";
 import taskCycleRouter from "../features/taskCycles/routes/taskCycleRoutes";
 import taskRouter from "../features/tasks/routes/taskRoutes";
 import typesRouter from "../features/types/routes/typesRoutes";
+import authRouter from "../features/auth/routes/authRoutes";
 
 const appRouter = Router();
+
+// Authentication router
+appRouter.use("/auth", authRouter);
 
 // Mount individual feature routers onto base paths
 appRouter.use("/users", userRouter);
