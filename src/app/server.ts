@@ -1,10 +1,15 @@
 import express from "express";
 import { env } from "../config/env";
+import appRouter from "../router/routes";
 
 const app = express();
 const PORT = env.port;
 
+//Main working app
 app.use(express.json());
+
+// Importing main router to be used throughout app
+app.use("/api", appRouter);
 
 app.get("/", (_req, res) => {
 	res.json({
