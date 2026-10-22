@@ -2,6 +2,8 @@ import express from "express";
 import { env } from "../config/env";
 import appRouter from "../router/routes";
 import { initDatabaseTable } from "../db/init";
+import bodyParser from "body-parser";
+import { errorHandler } from "@/utils/errorHandler";
 
 const app = express();
 const PORT = env.port;
@@ -10,20 +12,14 @@ const PORT = env.port;
 app.use(express.json());
 initDatabaseTable();
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // Importing main router to be used throughout app
 app.use("/api", appRouter);
 
-app.get("/", (_req, res) => {
-	res.json({
-		message: "SprintSheet API is running!",
-	});
-});
-app.get("/health", (_req, res) => {
-	res.json({
-		status: 200,
-		message: "HEALTH CHECK : OK [Sprintsheet API is running properly!]",
-	});
-});
+// Handling all the errors
+app.use(errorHandler);
 
 app.listen(PORT, () => {
 	console.log(`SprintSheet API running on http://localhost:${PORT}`);
