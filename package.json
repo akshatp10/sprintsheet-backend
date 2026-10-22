@@ -24,9 +24,14 @@
 	},
 	"homepage": "https://github.com/akshatp10/sprintsheet-backend#readme",
 	"dependencies": {
+		"argon2": "^0.45.1",
+		"body-parser": "^2.3.0",
 		"cors": "^2.8.6",
 		"dotenv": "^18.0.8",
 		"express": "^5.3.0",
+		"i": "^0.3.7",
+		"jsonwebtoken": "^9.0.3",
+		"npm": "^12.2.1",
 		"pg": "^8.23.1"
 	},
 	"devDependencies": {
