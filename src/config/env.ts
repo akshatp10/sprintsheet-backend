@@ -19,6 +19,11 @@ export const env = {
 	nodeEnv: process.env.NODE_ENV ?? "development",
 	port: Number(process.env.PORT ?? 5000),
 
+	jwt: {
+		jwt_secret: required("JWT_SECRET"),
+		jwt_expiry: required("JWT_EXPIRES_IN"),
+	},
+
 	db: {
 		host: required("DB_HOST"),
 		port: Number(required("DB_PORT")),
@@ -26,4 +31,8 @@ export const env = {
 		user: required("DB_USER"),
 		password: required("DB_PASSWORD"),
 	},
+
+	google_id: process.env.GOOGLE_CLIENT_ID,
+
+	fe_url: required("FRONTEND_URL"),
 };
