@@ -80,7 +80,7 @@ export async function loginUser(input: LoginInput) {
 	if (!user || !user.password || !valid)
 		throw new AppError(401, "Invalid email or password");
 
-	const { password, created_at, updated_at, ...safeUser } = user;
+	const { password, createdAt, updatedAt, ...safeUser } = user;
 	return { user: safeUser, token: signToken(user.id) };
 }
 
