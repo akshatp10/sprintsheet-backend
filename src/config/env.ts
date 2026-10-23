@@ -31,4 +31,8 @@ export const env = {
 		user: required("DB_USER"),
 		password: required("DB_PASSWORD"),
 	},
+
+	google_id: process.env.GOOGLE_CLIENT_ID,
+
+	fe_url: required("FRONTEND_URL"),
 };

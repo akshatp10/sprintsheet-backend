@@ -1,5 +1,5 @@
 import { pool } from "@/db/pool";
-import { CreateUserInput } from "../types/users.types";
+import { CreateGoogleUserInput, CreateUserInput } from "../types/users.types";
 
 export async function createUser(input: CreateUserInput) {
 	const result = await pool.query(
@@ -36,4 +36,34 @@ export async function findUserByEmail(email: string) {
 				updated_at: Date;
 		  }
 		| undefined;
+}
+
+export async function findUserByGoogleId(googleId: string) {
+	const result = await pool.query(
+		`SELECT * FROM users WHERE google_id = $1 LIMIT 1`,
+		[googleId],
+	);
+
+	return result.rows[0] ?? null;
+}
+
+export async function createGoogleUser(input: CreateGoogleUserInput) {
+	const result = await pool.query(
+		`INSERT INTO users (
+            id, name, email, password, is_google,
+            google_id, created_at, updated_at
+        )
+        VALUES ($1, $2, $3, NULL, TRUE, $4, $5, $6)
+        RETURNING *`,
+		[
+			input.id,
+			input.name,
+			input.email,
+			input.googleId,
+			input.createdAt,
+			input.updatedAt,
+		],
+	);
+
+	return result.rows[0];
 }

@@ -1,6 +1,6 @@
 import { RequestHandler } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
-import { loginUser, registerUser } from "../services/authServices";
+import { googleLogin, loginUser, registerUser } from "../services/authServices";
 
 export const authRegisterController: RequestHandler = async (
 	req,
@@ -21,6 +21,30 @@ export const authLoginController: RequestHandler = async (req, res, next) => {
 		const input = loginSchema.parse(req.body);
 		const { user, token } = await loginUser(input);
 		res.status(200).json({ success: true, user, token });
+	} catch (err) {
+		next(err);
+	}
+};
+
+export const authGoogleController: RequestHandler = async (req, res, next) => {
+	try {
+		const { idToken } = req.body;
+
+		if (typeof idToken !== "string" || !idToken.trim()) {
+			res.status(400).json({
+				success: false,
+				message: "Google ID token is required",
+			});
+			return;
+		}
+
+		const { user, token } = await googleLogin(idToken);
+
+		res.status(200).json({
+			success: true,
+			user,
+			token,
+		});
 	} catch (err) {
 		next(err);
 	}

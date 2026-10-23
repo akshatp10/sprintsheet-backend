@@ -18,14 +18,31 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 
 -- 2. Users
+
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
+    password TEXT,
+    is_google BOOLEAN NOT NULL DEFAULT FALSE,
+    google_id TEXT UNIQUE,
     created_at BIGINT NOT NULL,
-    updated_at BIGINT NOT NULL
+    updated_at BIGINT NOT NULL,
+    CONSTRAINT users_auth_method_check CHECK (
+        (
+            is_google = FALSE
+            AND password IS NOT NULL
+            AND google_id IS NULL
+        )
+        OR
+        (
+            is_google = TRUE
+            AND password IS NULL
+            AND google_id IS NOT NULL
+        )
+    )
 );
+
 
 -- 3. Project Members
 CREATE TABLE IF NOT EXISTS project_members (

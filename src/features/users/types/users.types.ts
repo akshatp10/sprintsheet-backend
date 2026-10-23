@@ -6,3 +6,12 @@ export interface CreateUserInput {
 	createdAt: number;
 	updatedAt: number;
 }
+
+export interface CreateGoogleUserInput {
+	id: string;
+	name: string;
+	email: string;
+	googleId: string;
+	createdAt: number;
+	updatedAt: number;
+}
