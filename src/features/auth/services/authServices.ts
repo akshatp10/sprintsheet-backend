@@ -1,14 +1,24 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "crypto";
-import { createUser, findUserByEmail } from "@/features/users/model/userModels";
+import {
+	createGoogleUser,
+	createUser,
+	findUserByEmail,
+	findUserByGoogleId,
+} from "@/features/users/model/userModels";
 import {
 	AuthTokenPayload,
-	loginInput,
-	registerInput,
+	LoginInput,
+	RegisterInput,
 } from "../types/auth.types";
 import { AppError } from "@/utils/appError";
 import { env } from "@/config/env";
+import { OAuth2Client } from "google-auth-library";
+
+const GOOGLE_ID = env.google_id;
+
+const googleClient = new OAuth2Client(GOOGLE_ID);
 
 const JWT_SECRET = env.jwt.jwt_secret;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not set");
@@ -31,7 +41,7 @@ export function verifyToken(token: string): AuthTokenPayload {
 	return jwt.verify(token, JWT_SECRET!) as AuthTokenPayload;
 }
 
-export async function registerUser(input: registerInput) {
+export async function registerUser(input: RegisterInput) {
 	const existing = await findUserByEmail(input.email);
 	if (existing) throw new AppError(409, "Email already in use");
 
@@ -49,7 +59,8 @@ export async function registerUser(input: registerInput) {
 			createdAt: now,
 			updatedAt: now,
 		});
-		return { user, token: signToken(user.id) };
+		const { password, created_at, updated_at, ...safeUser } = user;
+		return { user: safeUser, token: signToken(user.id) };
 	} catch (err: any) {
 		// race condition: unique violation
 		if (err?.code === "23505")
@@ -58,7 +69,7 @@ export async function registerUser(input: registerInput) {
 	}
 }
 
-export async function loginUser(input: loginInput) {
+export async function loginUser(input: LoginInput) {
 	const user = await findUserByEmail(input.email);
 
 	// Always run a verify so response time doesn't reveal whether the email exists
@@ -66,8 +77,105 @@ export async function loginUser(input: loginInput) {
 		.verify(user?.password ?? DUMMY_HASH, input.password)
 		.catch(() => false);
 
-	if (!user || !valid) throw new AppError(401, "Invalid email or password");
+	if (!user || !user.password || !valid)
+		throw new AppError(401, "Invalid email or password");
 
 	const { password, created_at, updated_at, ...safeUser } = user;
 	return { user: safeUser, token: signToken(user.id) };
+}
+
+export async function googleLogin(idToken: string) {
+	let payload;
+
+	try {
+		const ticket = await googleClient.verifyIdToken({
+			idToken,
+			audience: GOOGLE_ID,
+		});
+
+		payload = ticket.getPayload();
+	} catch {
+		throw new AppError(401, "Invalid Google token");
+	}
+
+	if (
+		!payload?.sub ||
+		!payload.email ||
+		!payload.name ||
+		payload.email_verified !== true
+	) {
+		throw new AppError(401, "Invalid Google account");
+	}
+
+	const googleId = payload.sub;
+	const email = payload.email.toLowerCase();
+	const name = payload.name;
+
+	const googleUser = await findUserByGoogleId(googleId);
+
+	if (googleUser) {
+		const { password, google_id, created_at, updated_at, ...safeUser } =
+			googleUser;
+
+		return {
+			user: safeUser,
+			token: signToken(googleUser.id),
+		};
+	}
+
+	const existingUser = await findUserByEmail(email);
+
+	if (existingUser) {
+		throw new AppError(
+			409,
+			"This email already has an account. Please use your original login method.",
+		);
+	}
+
+	const now = Date.now();
+
+	try {
+		const user = await createGoogleUser({
+			id: randomUUID(),
+			name,
+			email,
+			googleId,
+			createdAt: now,
+			updatedAt: now,
+		});
+
+		const { password, google_id, created_at, updated_at, ...safeUser } =
+			user;
+
+		return {
+			user: safeUser,
+			token: signToken(user.id),
+		};
+	} catch (err: any) {
+		if (err?.code === "23505") {
+			const existing = await findUserByGoogleId(googleId);
+
+			if (existing) {
+				const {
+					password,
+					google_id,
+					created_at,
+					updated_at,
+					...safeUser
+				} = existing;
+
+				return {
+					user: safeUser,
+					token: signToken(existing.id),
+				};
+			}
+
+			throw new AppError(
+				409,
+				"This email already has an account. Please use your original login method.",
+			);
+		}
+
+		throw err;
+	}
 }
