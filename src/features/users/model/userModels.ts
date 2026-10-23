@@ -1,5 +1,11 @@
 import { pool } from "@/db/pool";
-import { CreateGoogleUserInput, CreateUserInput } from "../types/users.types";
+import {
+	CreateGoogleUserInput,
+	CreateUserInput,
+	User,
+	UserSchema,
+	UserSummary,
+} from "../types/users.types";
 
 export async function createUser(input: CreateUserInput) {
 	const result = await pool.query(
@@ -26,16 +32,7 @@ export async function findUserByEmail(email: string) {
 		 FROM users WHERE email = $1`,
 		[email],
 	);
-	return result.rows[0] as
-		| {
-				id: string;
-				name: string;
-				email: string;
-				password: string;
-				created_at: Date;
-				updated_at: Date;
-		  }
-		| undefined;
+	return result.rows[0] as UserSchema | undefined;
 }
 
 export async function findUserByGoogleId(googleId: string) {
@@ -66,4 +63,40 @@ export async function createGoogleUser(input: CreateGoogleUserInput) {
 	);
 
 	return result.rows[0];
+}
+
+export async function findUserById(id: string) {
+	const result = await pool.query(
+		`SELECT id, name, email
+		 FROM users WHERE id = $1`,
+		[id],
+	);
+	return result.rows[0] as User | undefined;
+}
+
+export async function findUsersByIds(ids: string[]) {
+	const result = await pool.query(
+		`SELECT id, name
+         FROM users
+         WHERE id = ANY($1::text[])
+		 ORDER BY array_position($1::text[], id);`,
+		[ids],
+	);
+
+	return (result.rows as UserSummary[]) || [];
+}
+
+export async function findUsersByProjectId(
+	projectId: string,
+): Promise<UserSummary[]> {
+	const result = await pool.query(
+		`SELECT u.id, u.name
+         FROM project_members pm
+         JOIN users u ON u.id = pm.user_id
+         WHERE pm.project_id = $1
+         ORDER BY pm.created_at ASC`,
+		[projectId],
+	);
+
+	return result.rows as UserSummary[];
 }
