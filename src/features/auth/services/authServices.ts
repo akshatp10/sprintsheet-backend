@@ -26,19 +26,47 @@ if (!JWT_SECRET) throw new Error("JWT_SECRET is not set");
 const JWT_EXPIRES_IN = (env.jwt.jwt_expiry ??
 	"1h") as jwt.SignOptions["expiresIn"];
 
+const JWT_REFRESH_EXPIRES_IN = (env.jwt.jwt_refresh_expiry ??
+	"1d") as jwt.SignOptions["expiresIn"];
+
 const DUMMY_HASH =
 	"$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHRzb21lc2FsdA$3pXjJ0n2m0wq5m0v8mJ2m3c1k0y8p9Q2m3l4o5p6q7s";
 
 // Signing the token
 function signToken(userId: string) {
-	return jwt.sign({ userId } satisfies AuthTokenPayload, JWT_SECRET!, {
+	const accessToken = jwt.sign({ userId, type: "access" }, JWT_SECRET, {
 		expiresIn: JWT_EXPIRES_IN,
 	});
+
+	const refreshToken = jwt.sign({ userId, type: "refresh" }, JWT_SECRET, {
+		expiresIn: JWT_REFRESH_EXPIRES_IN,
+	});
+	return { accessToken, refreshToken };
 }
 
 //Verifying the authenticity of the JWT Token
 export function verifyToken(token: string): AuthTokenPayload {
 	return jwt.verify(token, JWT_SECRET!) as AuthTokenPayload;
+}
+
+export async function refreshAccessToken(refreshToken: string) {
+	let payload: string | jwt.JwtPayload;
+
+	try {
+		payload = jwt.verify(refreshToken, JWT_SECRET);
+	} catch {
+		throw new AppError(401, "Invalid or expired refresh token");
+	}
+
+	if (
+		typeof payload === "string" ||
+		typeof payload.userId !== "string" ||
+		payload.type !== "refresh"
+	) {
+		throw new AppError(401, "Invalid refresh token");
+	}
+
+	return signToken(payload.userId);
 }
 
 export async function registerUser(input: RegisterInput) {
