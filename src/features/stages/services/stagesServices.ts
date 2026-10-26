@@ -4,7 +4,9 @@ import {
 	createProjectStage,
 	createStageByName,
 	findStageByName,
+	getAllStages,
 	getProjectStages,
+	getStageById,
 } from "../model/stagesModel";
 import { CreateProjectStageInput } from "../types/stages.types";
 
@@ -93,4 +95,16 @@ export async function getProjectStagesService(projectId: string) {
 	const projectStages = await getProjectStages(projectId);
 
 	return { projectStages };
+}
+
+export async function getStageByIdService(typeId: string) {
+	const type = await getStageById(typeId);
+
+	return type;
+}
+
+export async function getAllStagesService() {
+	const types = await getAllStages();
+
+	return types;
 }
