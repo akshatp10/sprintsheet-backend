@@ -98,13 +98,17 @@ export async function getProjectStagesService(projectId: string) {
 }
 
 export async function getStageByIdService(typeId: string) {
-	const type = await getStageById(typeId);
+	const stage = await getStageById(typeId);
 
-	return type;
+	if (!stage) throw new AppError(404, "Stage not found");
+
+	return stage;
 }
 
 export async function getAllStagesService() {
-	const types = await getAllStages();
+	const stages = await getAllStages();
 
-	return types;
+	if (!stages) throw new AppError(404, "Stages not found");
+
+	return stages;
 }
