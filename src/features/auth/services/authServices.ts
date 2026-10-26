@@ -105,8 +105,11 @@ export async function loginUser(input: LoginInput) {
 		.verify(user?.password ?? DUMMY_HASH, input.password)
 		.catch(() => false);
 
-	if (!user || !user.password || !valid)
+	if (!user || !valid || !user.password) {
+		if (!user?.password && user)
+			throw new AppError(401, "Please sign in via Google");
 		throw new AppError(401, "Invalid email or password");
+	}
 
 	const { password, createdAt, updatedAt, ...safeUser } = user;
 	return { user: safeUser, token: signToken(user.id) };
