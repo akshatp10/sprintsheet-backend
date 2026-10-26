@@ -1,6 +1,11 @@
 import { RequestHandler } from "express";
 import { loginSchema, registerSchema } from "../schemas/authSchema";
-import { googleLogin, loginUser, registerUser } from "../services/authServices";
+import {
+	googleLogin,
+	loginUser,
+	refreshAccessToken,
+	registerUser,
+} from "../services/authServices";
 
 export const authRegisterController: RequestHandler = async (
 	req,
@@ -43,6 +48,33 @@ export const authGoogleController: RequestHandler = async (req, res, next) => {
 		res.status(200).json({
 			success: true,
 			data: { user, token },
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+export const authRefreshAccessTokenController: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
+	try {
+		const { refreshToken } = req.body;
+
+		if (typeof refreshToken !== "string" || !refreshToken.trim()) {
+			res.status(400).json({
+				success: false,
+				message: "Refresh token is required",
+			});
+			return;
+		}
+
+		const tokens = await refreshAccessToken(refreshToken);
+
+		res.status(200).json({
+			success: true,
+			data: tokens,
 		});
 	} catch (err) {
 		next(err);
