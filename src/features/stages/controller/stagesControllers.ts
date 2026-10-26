@@ -2,8 +2,11 @@ import type { RequestHandler } from "express";
 import {
 	createProjectStageService,
 	findOrCreateStageService,
+	getAllStagesService,
 	getProjectStagesService,
+	getStageByIdService,
 } from "../services/stagesServices";
+import { AppError } from "@/utils/appError";
 
 export const findOrCreateStageController: RequestHandler = async (
 	req,
@@ -42,7 +45,7 @@ export const createProjectStageController: RequestHandler = async (
 
 		res.status(201).json({
 			success: true,
-			data: { projectStage },
+			projectStage,
 		});
 	} catch (err) {
 		next(err);
@@ -60,7 +63,43 @@ export const getProjectStagesController: RequestHandler = async (
 
 		res.status(200).json({
 			success: true,
-			data: { projectStages },
+			projectStages,
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+export const getStageByIdController: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
+	try {
+		const { typeId } = req.body;
+
+		if (!typeId) throw new AppError(400, "StageId is required");
+
+		const type = await getStageByIdService(typeId);
+		res.status(200).json({
+			success: true,
+			type,
+		});
+	} catch (err) {
+		next(err);
+	}
+};
+
+export const getAllStagesController: RequestHandler = async (
+	req,
+	res,
+	next,
+) => {
+	try {
+		const types = await getAllStagesService();
+		res.status(200).json({
+			success: true,
+			types,
 		});
 	} catch (err) {
 		next(err);

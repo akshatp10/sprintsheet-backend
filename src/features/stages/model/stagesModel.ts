@@ -37,23 +37,23 @@ export async function createProjectStage(
 ): Promise<ProjectStage> {
 	const result = await pool.query<ProjectStage>(
 		`INSERT INTO project_stages (
-            id,
-            project_id,
-            stage_id,
-            "order",
-            name,
-            is_terminal,
-            created_at,
-            updated_at
-        )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING
-            id,
-            project_id AS "projectId",
-            stage_id AS "stageId",
-            "order",
-            name,
-            is_terminal AS "isTerminal"`,
+       id,
+       project_id,
+       stage_id,
+       "order",
+       name,
+       is_terminal,
+       created_at,
+       updated_at
+     )
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+     RETURNING
+       id,
+       project_id AS "projectId",
+       stage_id AS "stageId",
+       "order",
+       name,
+       is_terminal AS "isTerminal"`,
 		[
 			input.id,
 			input.project_id,
@@ -74,16 +74,35 @@ export async function getProjectStages(
 ): Promise<ProjectStage[]> {
 	const result = await pool.query<ProjectStage>(
 		`SELECT
-            id,
-            project_id AS "projectId",
-            stage_id AS "stageId",
-            "order",
-            name,
-            is_terminal AS "isTerminal",
-        FROM project_stages
-        WHERE project_id = $1
-        ORDER BY "order" ASC`,
+       id,
+       project_id AS "projectId",
+       stage_id AS "stageId",
+       "order",
+       name,
+       is_terminal AS "isTerminal",
+     FROM project_stages
+     WHERE project_id = $1
+     ORDER BY "order" ASC`,
 		[projectId],
+	);
+
+	return result.rows;
+}
+
+export async function getStageById(id: string): Promise<Stage | undefined> {
+	const result = await pool.query<Stage>(
+		`SELECT id, name
+     FROM stages
+     WHERE id = $1`,
+		[id],
+	);
+
+	return result.rows[0];
+}
+export async function getAllStages(): Promise<Stage[] | undefined> {
+	const result = await pool.query<Stage>(
+		`SELECT id, name
+     FROM stages`,
 	);
 
 	return result.rows;
