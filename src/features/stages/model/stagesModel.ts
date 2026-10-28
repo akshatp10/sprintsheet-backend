@@ -108,7 +108,7 @@ export async function getProjectStages(
        stage_id AS "stageId",
        "order",
        name,
-       is_terminal AS "isTerminal",
+       is_terminal AS "isTerminal"
      FROM project_stages
      WHERE project_id = $1
      ORDER BY "order" ASC`,
