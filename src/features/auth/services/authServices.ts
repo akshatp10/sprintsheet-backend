@@ -111,10 +111,7 @@ export async function loginUser(input: LoginInput) {
 
 	if (!user || !valid || !user.password) {
 		if (!user?.password && user)
-			throw new AppError(
-				401,
-				"This email already has an account. Please use your original login method.",
-			);
+			throw new AppError(401, "Please use your original login method.");
 		throw new AppError(401, "Invalid email or password");
 	}
 
