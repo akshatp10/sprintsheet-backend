@@ -80,10 +80,10 @@ export const getStageByIdController: RequestHandler = async (
 
 		if (!stageId) throw new AppError(400, "StageId is required");
 
-		const type = await getStageByIdService(stageId);
+		const stage = await getStageByIdService(stageId);
 		res.status(200).json({
 			success: true,
-			type,
+			stage,
 		});
 	} catch (err) {
 		next(err);
@@ -96,10 +96,10 @@ export const getAllStagesController: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const types = await getAllStagesService();
+		const stages = await getAllStagesService();
 		res.status(200).json({
 			success: true,
-			types,
+			stages,
 		});
 	} catch (err) {
 		next(err);
