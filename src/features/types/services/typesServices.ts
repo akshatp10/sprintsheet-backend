@@ -2,8 +2,7 @@ import { randomUUID } from "node:crypto";
 import { AppError } from "@/utils/appError";
 import {
 	createProjectType,
-	createTypeByName,
-	findTypeByName,
+	findOrCreateTypeByName,
 	getAllTypes,
 	getProjectTypes,
 	getTypeById,
@@ -17,24 +16,9 @@ export async function findOrCreateTypesService(typeName: string) {
 		throw new AppError(400, "Type name is required");
 	}
 
-	const existingType = await findTypeByName(name);
-
-	if (existingType) {
-		return { type: existingType, created: false };
-	}
-
-	const now = Date.now();
-
 	try {
-		const type = await createTypeByName({
-			id: randomUUID(),
-			name,
-			createdAt: now,
-			updatedAt: now,
-		});
-
-		return { type, created: true };
-	} catch (err: unknown) {
+		return await findOrCreateTypeByName(name);
+	} catch (err) {
 		throw new AppError(500, "Cannot create or find Type");
 	}
 }
