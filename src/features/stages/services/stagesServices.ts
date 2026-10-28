@@ -2,8 +2,7 @@ import { randomUUID } from "node:crypto";
 import { AppError } from "@/utils/appError";
 import {
 	createProjectStage,
-	createStageByName,
-	findStageByName,
+	findOrCreateStageByName,
 	getAllStages,
 	getProjectStages,
 	getStageById,
@@ -14,28 +13,13 @@ export async function findOrCreateStageService(stageName: string) {
 	const name = stageName.trim();
 
 	if (!name) {
-		throw new AppError(400, "Stage name is required");
+		throw new AppError(400, "Type name is required");
 	}
-
-	const existingStage = await findStageByName(name);
-
-	if (existingStage) {
-		return { stage: existingStage, created: false };
-	}
-
-	const now = Date.now();
 
 	try {
-		const stage = await createStageByName({
-			id: randomUUID(),
-			name,
-			createdAt: now,
-			updatedAt: now,
-		});
-
-		return { stage, created: true };
-	} catch (err: unknown) {
-		throw new AppError(500, "Cannot create or find stage");
+		return await findOrCreateStageByName(name);
+	} catch (err) {
+		throw new AppError(500, "Cannot create or find Type");
 	}
 }
 
