@@ -71,7 +71,8 @@ export async function refreshAccessToken(refreshToken: string) {
 
 export async function registerUser(input: RegisterInput) {
 	const existing = await findUserByEmail(input.email);
-	if (existing) throw new AppError(409, "Email already in use");
+	if (existing)
+		throw new AppError(409, "Email already in use, please try loggin in");
 
 	const passwordHash = await argon2.hash(input.password, {
 		type: argon2.argon2id,
@@ -92,7 +93,10 @@ export async function registerUser(input: RegisterInput) {
 	} catch (err: any) {
 		// race condition: unique violation
 		if (err?.code === "23505")
-			throw new AppError(409, "Email already in use");
+			throw new AppError(
+				409,
+				"Email already in use, please try loggin in",
+			);
 		throw err;
 	}
 }
@@ -107,7 +111,10 @@ export async function loginUser(input: LoginInput) {
 
 	if (!user || !valid || !user.password) {
 		if (!user?.password && user)
-			throw new AppError(401, "Please sign in via Google");
+			throw new AppError(
+				401,
+				"This email already has an account. Please use your original login method.",
+			);
 		throw new AppError(401, "Invalid email or password");
 	}
 
