@@ -5,6 +5,7 @@ import { env } from "../config/env";
 import appRouter from "../router/routes";
 import { initDatabaseTable } from "../db/init";
 import { errorHandler } from "@/utils/errorHandler";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const PORT = env.port;
@@ -20,6 +21,7 @@ app.use(cors(corsOptions));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use("/api", appRouter);
 
