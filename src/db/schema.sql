@@ -146,7 +146,8 @@ CREATE TABLE IF NOT EXISTS task_cycles (
     stage_id TEXT NOT NULL
         REFERENCES project_stages(id) ON DELETE RESTRICT,
     created_at BIGINT NOT NULL,
-    updated_at BIGINT NOT NULL
+    updated_at BIGINT NOT NULL,
+    UNIQUE (task_id, cycle_id)
 );
 
 -- Indexes for relationships and common lookups.
