@@ -1,9 +1,17 @@
 import { Router } from "express";
+import {
+	createCycleController,
+	getAllCyclesController,
+	getCycleController,
+	updateCycleController,
+} from "../controller/cyclesController";
 
 const cycleRouter = Router();
 
-cycleRouter.get("/", (req, res) => {
-	res.json({ message: "Fetching all cycles" });
-});
+cycleRouter.get("/getCycle", getCycleController);
+cycleRouter.get("/getAllCycles", getAllCyclesController);
+cycleRouter.post("/createCycle", createCycleController);
+cycleRouter.patch("/updateCycle", updateCycleController);
+// cycleRouter.delete("/deleteCycle", deleteCycleController);
 
 export default cycleRouter;
