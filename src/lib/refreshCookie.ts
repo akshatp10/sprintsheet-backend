@@ -6,7 +6,7 @@ export const refreshCookieOptions: CookieOptions = {
 	secure: process.env.NODE_ENV === "production",
 	sameSite: "lax",
 	path: "/api/auth",
-	maxAge: env.jwt.jwt_refresh_expiry,
+	maxAge: 21600000,
 };
 
 export const setRefreshCookie = (res: Response, refreshToken: string) => {

@@ -22,7 +22,7 @@ export const env = {
 	jwt: {
 		jwt_secret: required("JWT_SECRET"),
 		jwt_expiry: required("JWT_EXPIRES_IN"),
-		jwt_refresh_expiry: Number(required("JWT_REFRESH_EXPIRES_IN")),
+		jwt_refresh_expiry: required("JWT_REFRESH_EXPIRES_IN"),
 	},
 
 	db: {

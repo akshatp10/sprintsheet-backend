@@ -24,10 +24,10 @@ const JWT_SECRET = env.jwt.jwt_secret;
 if (!JWT_SECRET) throw new Error("JWT_SECRET is not set");
 
 const JWT_EXPIRES_IN = (env.jwt.jwt_expiry ??
-	"1h") as jwt.SignOptions["expiresIn"];
+	"5m") as jwt.SignOptions["expiresIn"];
 
 const JWT_REFRESH_EXPIRES_IN = (env.jwt.jwt_refresh_expiry ??
-	"1d") as jwt.SignOptions["expiresIn"];
+	"6h") as jwt.SignOptions["expiresIn"];
 
 const DUMMY_HASH =
 	"$argon2id$v=19$m=65536,t=3,p=4$c29tZXNhbHRzb21lc2FsdA$3pXjJ0n2m0wq5m0v8mJ2m3c1k0y8p9Q2m3l4o5p6q7s";
