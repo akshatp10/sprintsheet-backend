@@ -1,5 +1,9 @@
 import { AppError } from "@/utils/appError";
-import { findUserById, findUsersByIds } from "../model/userModels";
+import {
+	findUserById,
+	findUsersByIds,
+	findUsersByProjectId,
+} from "../model/userModels";
 
 export async function getUserById(userId: string) {
 	const user = await findUserById(userId);
@@ -17,7 +21,7 @@ export async function getUsersByIds(userIds: string[]) {
 }
 
 export async function getUsersByProject(projectId: string) {
-	const users = await findUserById(projectId);
+	const users = await findUsersByProjectId(projectId);
 	if (!users) {
 		throw new AppError(404, "No Users Found");
 	}
