@@ -1,5 +1,7 @@
-import { Pool } from "pg";
+import { Pool, PoolClient } from "pg";
 import { env } from "../config/env";
+
+export type Queryable = Pick<PoolClient, "query">;
 
 export const pool = new Pool({
 	host: env.db.host,
