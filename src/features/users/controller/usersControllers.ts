@@ -18,7 +18,7 @@ export const getUserController: RequestHandler = async (req, res, next) => {
 
 export const getUserByIdController: RequestHandler = async (req, res, next) => {
 	try {
-		const { userId } = req.body;
+		const userId = String(req.query.userId ?? "");
 		const { user } = await getUserById(userId);
 		res.status(200).json({ success: true, user });
 	} catch (err) {

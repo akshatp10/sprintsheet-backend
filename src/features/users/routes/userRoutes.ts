@@ -10,7 +10,7 @@ const userRouter = Router();
 
 userRouter.get("/", getUserController);
 userRouter.get("/byId", getUserByIdController);
-userRouter.get("/byIds", getUsersByIdsController);
+userRouter.post("/byIds", getUsersByIdsController);
 userRouter.get("/project", getUsersByProjectController);
 
 export default userRouter;
