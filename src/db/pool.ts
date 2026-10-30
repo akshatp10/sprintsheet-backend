@@ -1,7 +1,10 @@
 import { Pool, PoolClient } from "pg";
 import { env } from "../config/env";
+import pg from "pg";
 
 export type Queryable = Pick<PoolClient, "query">;
+
+pg.types.setTypeParser(1082, (value: any) => value);
 
 export const pool = new Pool({
 	host: env.db.host,

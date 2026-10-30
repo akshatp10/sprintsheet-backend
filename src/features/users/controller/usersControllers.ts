@@ -46,7 +46,7 @@ export const getUsersByProjectController: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const { projectId } = req.body;
+		const projectId = String(req.query.projectId ?? "");
 		const users = await getUsersByProject(projectId);
 		res.status(200).json({ success: true, users });
 	} catch (err) {
