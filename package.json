@@ -5,7 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon --watch src --ext ts --exec tsx src/app/server.ts",
-		"build": "tsc",
+		"build": "tsc && tsc-alias",
 		"start": "node dist/app/server.js"
 	},
 	"repository": {
@@ -45,6 +45,7 @@
 		"@types/node": "^26.6.6",
 		"@types/pg": "^8.23.1",
 		"nodemon": "^3.1.14",
+		"tsc-alias": "^1.9.9",
 		"tsx": "^4.23.15",
 		"typescript": "5.9.3"
 	}
