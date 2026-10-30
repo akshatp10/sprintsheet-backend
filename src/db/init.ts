@@ -5,32 +5,44 @@ import { env } from "../config/env";
 import { pool } from "./pool";
 
 export async function initDatabaseTable(): Promise<void> {
-	const admin = new Client({
-		host: env.db.host,
-		port: env.db.port,
-		user: env.db.user,
-		password: env.db.password,
-		database: "postgres",
-	});
+	const databaseUrl = new URL(env.db.url);
+	const databaseName = decodeURIComponent(databaseUrl.pathname.slice(1));
 
-	try {
-		await admin.connect();
+	// Create database automatically when enabled
+	if (env.db.autoCreateDatabase) {
+		const adminUrl = new URL(databaseUrl);
+		adminUrl.pathname = "/postgres";
 
-		const result = await admin.query(
-			"SELECT 1 FROM pg_database WHERE datname = $1",
-			[env.db.name],
-		);
+		const admin = new Client({
+			connectionString: adminUrl.toString(),
+			ssl: env.db.ssl ? { rejectUnauthorized: false } : undefined,
+		});
 
-		if (result.rowCount === 0) {
-			const name = `"${env.db.name.replace(/"/g, '""')}"`;
-			await admin.query(`CREATE DATABASE ${name}`);
-			console.log(`Created database ${env.db.name}`);
+		try {
+			await admin.connect();
+
+			const result = await admin.query(
+				"SELECT 1 FROM pg_database WHERE datname = $1",
+				[databaseName],
+			);
+
+			if (result.rowCount === 0) {
+				const safeName = `"${databaseName.replace(/"/g, '""')}"`;
+
+				await admin.query(`CREATE DATABASE ${safeName}`);
+
+				console.log(`Created database: ${databaseName}`);
+			} else {
+				console.log(`Database already exists: ${databaseName}`);
+			}
+		} finally {
+			await admin.end();
 		}
-	} finally {
-		await admin.end();
 	}
 
+	// Initialize schema using the application pool
 	const schema = await readFile("src/db/schema.sql", "utf8");
+
 	await pool.query(schema);
 
 	console.log("PostgreSQL schema is ready.");
