@@ -18,7 +18,7 @@ export const getUserController: RequestHandler = async (req, res, next) => {
 
 export const getUserByIdController: RequestHandler = async (req, res, next) => {
 	try {
-		const { userId } = req.body;
+		const userId = String(req.query.userId ?? "");
 		const { user } = await getUserById(userId);
 		res.status(200).json({ success: true, user });
 	} catch (err) {
@@ -46,7 +46,7 @@ export const getUsersByProjectController: RequestHandler = async (
 	next,
 ) => {
 	try {
-		const { projectId } = req.body;
+		const projectId = String(req.query.projectId ?? "");
 		const users = await getUsersByProject(projectId);
 		res.status(200).json({ success: true, users });
 	} catch (err) {

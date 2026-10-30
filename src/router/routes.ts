@@ -3,7 +3,7 @@ import userRouter from "../features/users/routes/userRoutes";
 import cycleRouter from "../features/cycles/routes/cycleRoutes";
 import projectRouter from "../features/project/routes/projectRoutes";
 import stageRouter from "../features/stages/routes/stageRoutes";
-import taskCycleRouter from "../features/taskCycles/routes/taskCycleRoutes";
+import taskCycleRouter from "../features/taskCycles/routes/taskCyclesRoutes";
 import taskRouter from "../features/tasks/routes/taskRoutes";
 import typesRouter from "../features/types/routes/typesRoutes";
 import authRouter from "../features/auth/routes/authRoutes";

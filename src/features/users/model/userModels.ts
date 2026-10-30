@@ -86,17 +86,16 @@ export async function findUsersByIds(ids: string[]) {
 	return (result.rows as UserSummary[]) || [];
 }
 
-export async function findUsersByProjectId(
-	projectId: string,
-): Promise<UserSummary[]> {
+export async function findUsersByProjectId(projectId: string) {
 	const result = await pool.query(
-		`SELECT u.id, u.name
-         FROM project_members pm
-         JOIN users u ON u.id = pm.user_id
-         WHERE pm.project_id = $1
-         ORDER BY pm.created_at ASC`,
+		`SELECT pm.id, pm.project_id AS "projectId", pm.user_id AS "userId",
+		        pm.role, u.name
+		 FROM project_members pm
+		 JOIN users u ON u.id = pm.user_id
+		 WHERE pm.project_id = $1
+		 ORDER BY pm.created_at ASC`,
 		[projectId],
 	);
 
-	return result.rows as UserSummary[];
+	return result.rows;
 }
