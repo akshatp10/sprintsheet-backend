@@ -8,11 +8,15 @@ import taskRouter from "../features/tasks/routes/taskRoutes";
 import typesRouter from "../features/types/routes/typesRoutes";
 import authRouter from "../features/auth/routes/authRoutes";
 import { requireAuth } from "@/middleware/authMiddlewares";
+import invitationRouter, {
+	invitationPublicRouter,
+} from "@/features/invites/routes/invitationRoutes";
 
 const appRouter = Router();
 
 // Authentication router
 appRouter.use("/auth", authRouter);
+appRouter.use("/invitations", invitationPublicRouter);
 
 // Middleware to validate the token
 appRouter.use(requireAuth);
@@ -25,5 +29,6 @@ appRouter.use("/stages", stageRouter);
 appRouter.use("/taskCycles", taskCycleRouter);
 appRouter.use("/tasks", taskRouter);
 appRouter.use("/types", typesRouter);
+appRouter.use("/invitations", invitationRouter);
 
 export default appRouter;

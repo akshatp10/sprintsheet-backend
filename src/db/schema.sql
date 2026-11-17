@@ -150,6 +150,28 @@ CREATE TABLE IF NOT EXISTS task_cycles (
     UNIQUE (task_id, cycle_id)
 );
 
+-- 11. Project Invitations
+-- Only the sha256 hash of the emailed token is stored.
+-- `email` is always stored trimmed + lowercased.
+CREATE TABLE IF NOT EXISTS project_invitations (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL
+        REFERENCES projects(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'member'
+        CHECK (role IN ('member', 'admin')),
+    token_hash TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL DEFAULT 'pending'
+        CHECK (status IN ('pending', 'accepted', 'revoked', 'expired')),
+    invited_by TEXT NOT NULL
+        REFERENCES users(id) ON DELETE CASCADE,
+    expires_at BIGINT NOT NULL,
+    accepted_by TEXT
+        REFERENCES users(id) ON DELETE SET NULL,
+    created_at BIGINT NOT NULL,
+    updated_at BIGINT NOT NULL
+);
+
 -- Indexes for relationships and common lookups.
 CREATE INDEX IF NOT EXISTS idx_project_members_user_id
     ON project_members(user_id);
@@ -181,4 +203,10 @@ CREATE INDEX IF NOT EXISTS idx_task_cycles_cycle_id
 CREATE INDEX IF NOT EXISTS idx_task_cycles_cycle_task
     ON task_cycles(cycle_id, task_id);
 
+-- One pending invitation per email per project.
+-- Also serves the admin "pending invitations" listing (project_id prefix).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_pending_invitation
+    ON project_invitations(project_id, email)
+    WHERE status = 'pending';
+ 
 COMMIT;

@@ -8,6 +8,10 @@ import {
 	getAllProjectsByUser,
 	getProjectDetailsById,
 } from "../model/projectModels";
+import {
+	inviteToProjectService,
+	normalizeInvitePeople,
+} from "@/features/invites/services/invitationServices";
 
 const CYCLE_LENGTHS = ["default", "custom", "nocycle"];
 
@@ -55,12 +59,44 @@ export async function createProjectService(
 ) {
 	validateProjectInput(input);
 
-	return createProject(ownerId, {
+	// Bad emails/roles fail the request BEFORE the project is created.
+	const invitedPeople = input.invitedPeople?.length
+		? normalizeInvitePeople(input.invitedPeople)
+		: [];
+
+	const project = await createProject(ownerId, {
 		...input,
 		name: input.name.trim(),
 		key: input.key.trim(),
 		stages: input.stages.map((s) => ({ name: s.name.trim() })),
+		invitedPeople,
 	});
+
+	if (invitedPeople.length === 0) return project;
+
+	try {
+		const { invitations, skipped } = await inviteToProjectService(
+			ownerId,
+			project.id,
+			invitedPeople,
+		);
+
+		return { ...project, invitations, skipped };
+	} catch (error) {
+		console.error(
+			"Failed to create invitations for project:",
+			project.id,
+			error,
+		);
+
+		return {
+			...project,
+			invitations: [],
+			skipped: [],
+			invitationError:
+				"Project created, but the invitations could not be sent. Try again from the members screen.",
+		};
+	}
 }
 
 export async function getProjectByIdService(projectId: string, userId: string) {
