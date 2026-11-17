@@ -1,4 +1,3 @@
-import nodemailer, { type Transporter } from "nodemailer";
 import { env } from "@/config/env";
 
 export interface MailOptions {
@@ -8,39 +7,47 @@ export interface MailOptions {
 	html: string;
 }
 
-// undefined = not initialised yet, null = console mode (no real sending)
-let transport: Transporter | null | undefined;
-
-function getTransport(): Transporter | null {
-	if (transport !== undefined) return transport;
-
-	if (env.mail.transport !== "smtp") {
-		transport = null;
-		return transport;
-	}
-
-	transport = nodemailer.createTransport({
-		host: env.mail.host,
-		port: env.mail.port,
-		secure: env.mail.port === 465,
-		auth: { user: env.mail.user, pass: env.mail.pass },
-	});
-
-	return transport;
-}
-
 export async function sendMail(options: MailOptions) {
-	const mailTransport = getTransport();
-
-	if (!mailTransport) {
+	if (env.mail.transport === "console") {
 		console.log(
-			`\n[mail:console] to=${options.to}\nsubject: ${options.subject}\n${options.text}\n`,
+			`\n[mail:console] to=${options.to}\n` +
+				`subject: ${options.subject}\n${options.text}\n`,
 		);
 		return;
 	}
 
-	await mailTransport.sendMail({
-		from: env.mail.from,
-		...options,
+	if (env.mail.transport !== "brevo") {
+		throw new Error(`Unsupported mail transport: ${env.mail.transport}`);
+	}
+
+	const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+		method: "POST",
+		headers: {
+			accept: "application/json",
+			"api-key": env.mail.apiKey!,
+			"content-type": "application/json",
+		},
+		body: JSON.stringify({
+			sender: {
+				name: "Sprintsheet",
+				email: env.mail.from!.match(/<(.+)>/)?.[1] ?? env.mail.from,
+			},
+			to: [{ email: options.to }],
+			subject: options.subject,
+			textContent: options.text,
+			htmlContent: options.html,
+		}),
 	});
+
+	const result = await response.json();
+
+	if (!response.ok) {
+		console.error("[mail:brevo] Failed:", result);
+
+		throw new Error(
+			`Email sending failed: ${result.message ?? response.statusText}`,
+		);
+	}
+
+	return result;
 }

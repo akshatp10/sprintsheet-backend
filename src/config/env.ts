@@ -37,10 +37,7 @@ export const env = {
 
 	mail: {
 		transport: process.env.MAIL_TRANSPORT ?? "console",
-		host: process.env.SMTP_HOST,
-		port: Number(process.env.SMTP_PORT ?? 587),
-		user: process.env.SMTP_USER,
-		pass: process.env.SMTP_PASS,
+		apiKey: process.env.BREVO_API_KEY,
 		from: process.env.MAIL_FROM,
 	},
 };
@@ -49,4 +46,14 @@ if (env.mail.transport === "smtp") {
 	for (const name of ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"]) {
 		required(name);
 	}
+}
+
+if (env.mail.transport === "resend") {
+	required("RESEND_API_KEY");
+	required("MAIL_FROM");
+}
+
+if (env.mail.transport === "brevo") {
+	required("BREVO_API_KEY");
+	required("MAIL_FROM");
 }
