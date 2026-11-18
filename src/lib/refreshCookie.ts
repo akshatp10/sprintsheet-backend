@@ -3,8 +3,8 @@ import type { CookieOptions, Response } from "express";
 
 export const refreshCookieOptions: CookieOptions = {
 	httpOnly: true,
-	secure: process.env.NODE_ENV === "production",
-	sameSite: "lax",
+	secure: env.nodeEnv === "production",
+	sameSite: env.nodeEnv === "production" ? "none" : "lax",
 	path: "/api/auth",
 	maxAge: 21600000,
 };
@@ -14,10 +14,5 @@ export const setRefreshCookie = (res: Response, refreshToken: string) => {
 };
 
 export const clearRefreshCookie = (res: Response) => {
-	res.clearCookie("refreshToken", {
-		httpOnly: true,
-		secure: env.nodeEnv === "production",
-		sameSite: "lax",
-		path: "/api/auth",
-	});
+	res.clearCookie("refreshToken", refreshCookieOptions);
 };
