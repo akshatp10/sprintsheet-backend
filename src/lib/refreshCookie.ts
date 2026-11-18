@@ -3,8 +3,8 @@ import type { CookieOptions, Response } from "express";
 
 export const refreshCookieOptions: CookieOptions = {
 	httpOnly: true,
-	secure: env.nodeEnv === "production",
-	sameSite: env.nodeEnv === "production" ? "none" : "lax",
+	secure: true,
+	sameSite: "none",
 	path: "/api/auth",
 	maxAge: 21600000,
 };
