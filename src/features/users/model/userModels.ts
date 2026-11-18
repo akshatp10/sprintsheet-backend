@@ -74,18 +74,6 @@ export async function findUserById(id: string) {
 	return result.rows[0] as User | undefined;
 }
 
-export async function findUsersByIds(ids: string[]) {
-	const result = await pool.query(
-		`SELECT id, name
-         FROM users
-         WHERE id = ANY($1::text[])
-		 ORDER BY array_position($1::text[], id);`,
-		[ids],
-	);
-
-	return (result.rows as UserSummary[]) || [];
-}
-
 export async function findUsersByProjectId(projectId: string) {
 	const result = await pool.query(
 		`SELECT pm.id, pm.project_id AS "projectId", pm.user_id AS "userId",
