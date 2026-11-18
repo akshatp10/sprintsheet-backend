@@ -20,6 +20,9 @@ export async function sendMail(options: MailOptions) {
 		throw new Error(`Unsupported mail transport: ${env.mail.transport}`);
 	}
 
+	const from = env.mail.from!;
+	const senderMatch = from.match(/^(.*?)\s*<(.+)>$/);
+
 	const response = await fetch("https://api.brevo.com/v3/smtp/email", {
 		method: "POST",
 		headers: {
@@ -27,10 +30,11 @@ export async function sendMail(options: MailOptions) {
 			"api-key": env.mail.apiKey!,
 			"content-type": "application/json",
 		},
+		signal: AbortSignal.timeout(10_000),
 		body: JSON.stringify({
 			sender: {
-				name: "Sprintsheet",
-				email: env.mail.from!.match(/<(.+)>/)?.[1] ?? env.mail.from,
+				name: senderMatch?.[1] || "Sprintsheet",
+				email: senderMatch?.[2] ?? from,
 			},
 			to: [{ email: options.to }],
 			subject: options.subject,
@@ -39,13 +43,26 @@ export async function sendMail(options: MailOptions) {
 		}),
 	});
 
-	const result = await response.json();
+	const responseText = await response.text();
+
+	let result: Record<string, unknown> = {};
+
+	try {
+		result = responseText ? JSON.parse(responseText) : {};
+	} catch {
+		result = { rawResponse: responseText };
+	}
 
 	if (!response.ok) {
-		console.error("[mail:brevo] Failed:", result);
+		console.error("[mail:brevo] Failed:", {
+			status: response.status,
+			result,
+		});
 
 		throw new Error(
-			`Email sending failed: ${result.message ?? response.statusText}`,
+			`Email sending failed (${response.status}): ${
+				result.message ?? response.statusText
+			}`,
 		);
 	}
 

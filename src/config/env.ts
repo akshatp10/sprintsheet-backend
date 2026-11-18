@@ -5,6 +5,26 @@ dotenv.config({
 	path: path.resolve(process.cwd(), ".env"),
 });
 
+const MAIL_TRANSPORTS = ["console", "brevo"] as const;
+
+const mailTransport =
+	process.env.MAIL_TRANSPORT ??
+	(process.env.NODE_ENV === "production" ? undefined : "console");
+
+if (
+	!mailTransport ||
+	!MAIL_TRANSPORTS.includes(mailTransport as (typeof MAIL_TRANSPORTS)[number])
+) {
+	throw new Error(
+		`Invalid MAIL_TRANSPORT: ${mailTransport ?? "not configured"}. Supported transports: ${MAIL_TRANSPORTS.join(", ")}`,
+	);
+}
+
+if (mailTransport === "brevo") {
+	required("BREVO_API_KEY");
+	required("MAIL_FROM");
+}
+
 function required(name: string): string {
 	const value = process.env[name];
 
@@ -36,24 +56,8 @@ export const env = {
 	fe_url: required("FRONTEND_URL"),
 
 	mail: {
-		transport: process.env.MAIL_TRANSPORT ?? "console",
+		transport: mailTransport,
 		apiKey: process.env.BREVO_API_KEY,
 		from: process.env.MAIL_FROM,
 	},
 };
-
-if (env.mail.transport === "smtp") {
-	for (const name of ["SMTP_HOST", "SMTP_USER", "SMTP_PASS", "MAIL_FROM"]) {
-		required(name);
-	}
-}
-
-if (env.mail.transport === "resend") {
-	required("RESEND_API_KEY");
-	required("MAIL_FROM");
-}
-
-if (env.mail.transport === "brevo") {
-	required("BREVO_API_KEY");
-	required("MAIL_FROM");
-}

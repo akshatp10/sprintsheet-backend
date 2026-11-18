@@ -30,14 +30,14 @@ export async function findMemberEmails(projectId: string, emails: string[]) {
 /** Names used in the invitation email. */
 export async function getInviteContext(projectId: string, userId: string) {
 	const { rows } = await pool.query(
-		`SELECT p.name AS "projectName", u.name AS "inviterName"
+		`SELECT p.name AS "projectName", u.name AS "inviterName", p.is_archived AS "isArchived"
 		 FROM projects p
 		 CROSS JOIN users u
 		 WHERE p.id = $1 AND u.id = $2`,
 		[projectId, userId],
 	);
 	return rows[0] as
-		| { projectName: string; inviterName: string }
+		| { projectName: string; inviterName: string; isArchived: boolean }
 		| undefined;
 }
 

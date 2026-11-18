@@ -24,6 +24,7 @@ import {
 } from "../types/invitation.types";
 import { buildInvitationEmail } from "@/lib/utils/invitationEmail";
 import { ProjectRole } from "@/features/project/types/project.types";
+import { env } from "@/config/env";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ROLES: ProjectRole[] = ["member", "admin"];
@@ -94,7 +95,7 @@ const deliverInvitation = async (input: {
 	projectName: string;
 	inviterName: string;
 }): Promise<InviteResult> => {
-	const link = `${process.env.APP_URL}/invite/${input.token}`;
+	const link = `${env.fe_url}/invite/${input.token}`;
 
 	try {
 		await sendMail({
@@ -140,6 +141,9 @@ export async function inviteToProjectService(
 
 	const context = await getInviteContext(projectId, inviterId);
 	if (!context) throw new AppError(404, "Project not found");
+	if (context.isArchived) {
+		throw new AppError(409, "Cannot invite members to an archived project");
+	}
 
 	const now = Date.now();
 	const expiresAt = now + INVITATION_TTL_MS;
@@ -243,6 +247,9 @@ export async function resendInvitationService(
 
 	const context = await getInviteContext(invitation.projectId, userId);
 	if (!context) throw new AppError(404, "Project not found");
+	if (context.isArchived) {
+		throw new AppError(409, "Cannot invite members to an archived project");
+	}
 
 	const now = Date.now();
 	const token = generateToken();
