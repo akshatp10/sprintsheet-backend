@@ -45,13 +45,19 @@ export async function sendMail(options: MailOptions) {
 
 	const responseText = await response.text();
 
-	let result: Record<string, unknown> = {};
+	const result: Record<string, unknown> = (() => {
+		try {
+			const parsed: unknown = responseText
+				? JSON.parse(responseText)
+				: {};
 
-	try {
-		result = responseText ? JSON.parse(responseText) : {};
-	} catch {
-		result = { rawResponse: responseText };
-	}
+			return typeof parsed === "object" && parsed !== null
+				? (parsed as Record<string, unknown>)
+				: { rawResponse: responseText };
+		} catch {
+			return { rawResponse: responseText };
+		}
+	})();
 
 	if (!response.ok) {
 		console.error("[mail:brevo] Failed:", {

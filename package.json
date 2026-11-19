@@ -6,7 +6,8 @@
 	"scripts": {
 		"dev": "nodemon --watch src --ext ts --exec tsx src/app/server.ts",
 		"build": "tsc",
-		"start": "node dist/app/server.js"
+		"start": "node dist/app/server.js",
+		"lint": "eslint src"
 	},
 	"repository": {
 		"type": "git",
@@ -38,14 +39,18 @@
 		"zod": "^4.6.7"
 	},
 	"devDependencies": {
+		"@eslint/js": "^10.0.1",
 		"@types/cookie-parser": "^1.4.10",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^26.6.6",
 		"@types/pg": "^8.23.1",
+		"eslint": "^10.15.0",
+		"globals": "^17.14.0",
 		"nodemon": "^3.1.14",
 		"tsx": "^4.23.15",
-		"typescript": "5.9.3"
+		"typescript": "5.9.3",
+		"typescript-eslint": "^8.73.0"
 	}
 }

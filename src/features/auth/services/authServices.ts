@@ -90,13 +90,19 @@ export async function registerUser(input: RegisterInput) {
 		});
 		const { password, created_at, updated_at, ...safeUser } = user;
 		return { user: safeUser, token: signToken(user.id) };
-	} catch (err: any) {
-		// race condition: unique violation
-		if (err?.code === "23505")
+	} catch (err: unknown) {
+		if (
+			typeof err === "object" &&
+			err !== null &&
+			"code" in err &&
+			err.code === "23505"
+		) {
 			throw new AppError(
 				409,
-				"Email already in use, please try loggin in",
+				"Email already in use, please try logging in",
 			);
+		}
+
 		throw err;
 	}
 }
@@ -186,8 +192,13 @@ export async function googleLogin(idToken: string) {
 			user: safeUser,
 			token: signToken(user.id),
 		};
-	} catch (err: any) {
-		if (err?.code === "23505") {
+	} catch (err: unknown) {
+		if (
+			typeof err === "object" &&
+			err !== null &&
+			"code" in err &&
+			err.code === "23505"
+		) {
 			const existing = await findUserByGoogleId(googleId);
 
 			if (existing) {

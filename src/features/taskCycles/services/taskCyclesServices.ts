@@ -35,10 +35,24 @@ const parseFromCycleId = (value: unknown): string | null => {
 	return requireId(value, "fromCycleId");
 };
 
-const parseDestination = (to: any): TaskDestination => {
-	if (to?.type === "backlog") return { type: "backlog" };
+const parseDestination = (to: unknown): TaskDestination => {
+	if (typeof to !== "object" || to === null) {
+		throw new AppError(400, "Invalid destination");
+	}
 
-	if (to?.type === "cycle") {
+	if (!("type" in to)) {
+		throw new AppError(400, "Invalid destination");
+	}
+
+	if (to.type === "backlog") {
+		return { type: "backlog" };
+	}
+
+	if (to.type === "cycle") {
+		if (!("cycleId" in to) || !("stageId" in to)) {
+			throw new AppError(400, "Invalid destination");
+		}
+
 		return {
 			type: "cycle",
 			cycleId: requireId(to.cycleId, "Destination cycleId"),
